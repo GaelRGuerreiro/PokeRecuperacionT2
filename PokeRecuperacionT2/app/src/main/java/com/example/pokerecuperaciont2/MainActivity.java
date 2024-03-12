@@ -15,18 +15,23 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
     private Context context = this;
-    static String host = "https://pokeapi.co/api/v2/pokemon";
+    static String host = "https://pokeapi.co/api/v2/pokemon?limit=151";
+
 
     private TextView pokeTextView;
     private ImageView pokeImageView;
     private String pokeName;
-    private String pokeImage;
+    private String pokeUrl;
+    private List<Pokemon> pokemon;
 
 
     @Override
@@ -42,24 +47,32 @@ public class MainActivity extends AppCompatActivity {
 
         JsonObjectRequest request = new JsonObjectRequest(
                 Request.Method.GET,
-                host+"",
+                host,
                 null,
                 new Response.Listener<JSONObject>() {
 
                     @Override
                     public void onResponse(JSONObject response) {
+                        JSONArray results = null;
                         try {
-                            pokeName = response.getString("name");
-                            pokeImage = response.getString("url");
-                        } catch (Exception e) {
-                        }
-                        pokeTextView = findViewById(R.id.textoPokemon);
-                        pokeTextView.setText(pokeName);
-                        pokeImageView = findViewById(R.id.imagenCelda);
-                        try {
-                            Util.downloadBitmapToImageView(response.getString("url"), pokeImageView);
+                            results = response.getJSONArray("results");
                         } catch (JSONException e) {
                             throw new RuntimeException(e);
+                        }
+                        for (int i = 0; i < results.length(); i++) {
+                            JSONObject result = null;
+                            try {
+                                result = results.getJSONObject(i);
+                            } catch (JSONException e) {
+                                throw new RuntimeException(e);
+                            }
+                            try {
+                                pokemon.add(new Pokemon(
+                                        result.getString("name"),
+                                        result.getString("url")));
+                            } catch (JSONException e) {
+                                throw new RuntimeException(e);
+                            }
                         }
                     }
                 }, new Response.ErrorListener() {

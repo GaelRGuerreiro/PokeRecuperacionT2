@@ -1,6 +1,8 @@
 package com.example.pokerecuperaciont2;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,11 +14,11 @@ import java.util.List;
 
 public class Adaptador extends RecyclerView.Adapter<Celda> {
 
-   private List<Celda> pokemons;
+   private List<Pokemon> pokemons;
 
 
-   public Adaptador(List<Celda> pokemons){
-       this.pokemons=pokemons;
+   public Adaptador(List<Pokemon> datos,Activity activity){
+       this.pokemons=datos;
    }
 
 
@@ -35,13 +37,24 @@ public class Adaptador extends RecyclerView.Adapter<Celda> {
 
     @Override
     public void onBindViewHolder(@NonNull Celda holder, int position) {
-        Pokemon pokemon= pokemons.getPosition();
-        holder.pintarTextView(pokemons);
+        Pokemon datos = pokemons.get(position);
+        holder.pintarTextView(datos);
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+
+        @Override
+        public void onClick (View v){
+            Context context = v.getContext();
+            Intent intent = new Intent(context, DetailActivity.class);
+            intent.putExtra("url", datos.getImageUrl());
+            context.startActivity(intent);
+
+        }
+    });
 
     }
 
     @Override
     public int getItemCount() {
-        return 0;
+        return pokemons.size();
     }
 }
