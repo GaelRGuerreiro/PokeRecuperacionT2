@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -14,12 +15,16 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.material.snackbar.Snackbar;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.List;
+
+import android.widget.ProgressBar;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -32,17 +37,23 @@ public class MainActivity extends AppCompatActivity {
     private String pokeName;
     private String pokeUrl;
     private List<Pokemon> pokemon;
+    private ProgressBar progressBar;
+
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        this.progressBar = findViewById(R.id.progress_bar);
+
         getPokemon();
     }
 
 
     public void getPokemon() throws NullPointerException {
+        progressBar.setVisibility(View.VISIBLE);
+
 
 
         JsonObjectRequest request = new JsonObjectRequest(
@@ -54,6 +65,8 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(JSONObject response) {
                         JSONArray results = null;
+                        progressBar.setVisibility(View.INVISIBLE);
+
                         try {
                             results = response.getJSONArray("results");
                         } catch (JSONException e) {
@@ -79,9 +92,17 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onErrorResponse(VolleyError error) {
-                Toast.makeText(context, "Problema recibiendo pokemon", Toast.LENGTH_LONG).show();
+                progressBar.setVisibility(View.INVISIBLE);
 
+                if (error.networkResponse == null) {
 
+                    Toast.makeText(MainActivity.this, "Error de conexión", Toast.LENGTH_SHORT).show();
+
+                } else {
+
+                    int serverCode = error.networkResponse.statusCode;
+                    Toast.makeText(MainActivity.this, "Ha habido un error" + serverCode, Toast.LENGTH_SHORT).show();
+                }
             }
 
 
